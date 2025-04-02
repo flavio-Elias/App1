@@ -1,9 +1,8 @@
-// csv_reader.h - Declaraciones de funciones para leer el CSV
+/* csv_reader.h */
 #ifndef CSV_READER_H
 #define CSV_READER_H
+#include "orders.h"
 
-#include "structures.h"
+Order* read_csv(const char* filename, int* order_count);
 
-int read_csv(const char *filename, struct order **orders);
-
-#endif // CSV_READER_H
+#endif

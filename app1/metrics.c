@@ -1,113 +1,71 @@
-// metrics.c - Implementación de métricas
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+/* metrics.c */
 #include "metrics.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-// Función para calcular la pizza más vendida
-char* most_sold_pizza(int *size, struct order *orders) {
-    int max_quantity = 0;
-    char *best_seller = malloc(50);
-    if (!best_seller) return NULL;
+char* most_sold_pizza(int* size, Order* orders) {
+    // Check for valid input
+    if (*size <= 0 || orders == NULL) {
+        return strdup("No hay datos de pizzas");
+    }
 
+    // Create arrays to track unique pizzas and their counts
+    char pizza_names[1000][50];
+    int pizza_counts[1000] = {0};
+    int unique_pizzas = 0;
+
+    // Count pizza occurrences by name_id, accounting for quantity
     for (int i = 0; i < *size; i++) {
-        if (orders[i].quantity > max_quantity) {
-            max_quantity = orders[i].quantity;
-            strcpy(best_seller, orders[i].pizza_name);
+        // Debug
+        printf("Procesando: %s (cantidad: %d)\n", orders[i].pizza_name_id, orders[i].quantity);
+
+        // Look for this pizza in our existing list
+        int found = -1;
+        for (int j = 0; j < unique_pizzas; j++) {
+            if (strcmp(orders[i].pizza_name_id, pizza_names[j]) == 0) {
+                found = j;
+                break;
+            }
+        }
+
+        // Add to existing entry or create new one
+        if (found >= 0) {
+            pizza_counts[found] += orders[i].quantity;
+        } else {
+            strncpy(pizza_names[unique_pizzas], orders[i].pizza_name_id, 49);
+            pizza_names[unique_pizzas][49] = '\0';
+            pizza_counts[unique_pizzas] = orders[i].quantity;
+            unique_pizzas++;
         }
     }
-    return best_seller;
-}
 
-// Función para calcular la pizza menos vendida
-char* least_sold_pizza(int *size, struct order *orders) {
-    int min_quantity = __INT_MAX__;
-    char *least_seller = malloc(50);
-    if (!least_seller) return NULL;
+    // Debug output
+    printf("Conteo final de pizzas:\n");
+    for (int i = 0; i < unique_pizzas; i++) {
+        printf("  %s: %d unidades\n", pizza_names[i], pizza_counts[i]);
+    }
 
-    for (int i = 0; i < *size; i++) {
-        if (orders[i].quantity < min_quantity) {
-            min_quantity = orders[i].quantity;
-            strcpy(least_seller, orders[i].pizza_name);
+    // Find the pizza with highest count
+    if (unique_pizzas == 0) {
+        return strdup("No hay datos de pizzas");
+    }
+
+    int max_index = 0;
+    for (int i = 1; i < unique_pizzas; i++) {
+        if (pizza_counts[i] > pizza_counts[max_index]) {
+            max_index = i;
         }
     }
-    return least_seller;
-}
 
-// Función para calcular la fecha con más ventas en dinero
-char* date_most_sales_money(int *size, struct order *orders) {
-    char *best_date = malloc(20);
-    float max_revenue = 0;
-    if (!best_date) return NULL;
-
-    for (int i = 0; i < *size; i++) {
-        if (orders[i].total_price > max_revenue) {
-            max_revenue = orders[i].total_price;
-            strcpy(best_date, orders[i].order_date);
-        }
-    }
-    return best_date;
-}
-
-// Función para calcular la fecha con menos ventas en dinero
-char* date_least_sales_money(int *size, struct order *orders) {
-    char *worst_date = malloc(20);
-    float min_revenue = __FLT_MAX__;
-    if (!worst_date) return NULL;
-
-    for (int i = 0; i < *size; i++) {
-        if (orders[i].total_price < min_revenue) {
-            min_revenue = orders[i].total_price;
-            strcpy(worst_date, orders[i].order_date);
-        }
-    }
-    return worst_date;
-}
-
-// Función para calcular el promedio de pizzas por orden
-char* avg_pizzas_per_order(int *size, struct order *orders) {
-    float total_pizzas = 0;
-    int total_orders = 0;
-    char *result = malloc(50);
-    if (!result) return NULL;
-
-    for (int i = 0; i < *size; i++) {
-        total_pizzas += orders[i].quantity;
-        total_orders++;
+    // Prepare result
+    char* result = malloc(100);
+    if (!result) {
+        return strdup("Error de memoria");
     }
 
-    snprintf(result, 50, "%.2f", total_pizzas / total_orders);
-    return result;
-}
+    sprintf(result, "Pizza más vendida: %s con %d unidades",
+            pizza_names[max_index], pizza_counts[max_index]);
 
-// Función para calcular el promedio de pizzas por día
-char* avg_pizzas_per_day(int *size, struct order *orders) {
-    float total_pizzas = 0;
-    int total_days = 0;
-    char *result = malloc(50);
-    if (!result) return NULL;
-
-    for (int i = 0; i < *size; i++) {
-        total_pizzas += orders[i].quantity;
-        total_days++;
-    }
-
-    snprintf(result, 50, "%.2f", total_pizzas / total_days);
-    return result;
-}
-
-// Función para calcular el ingrediente más vendido
-char* most_sold_ingredient(int *size, struct order *orders) {
-    char *best_ingredient = malloc(200);
-    if (!best_ingredient) return NULL;
-    strcpy(best_ingredient, orders[0].pizza_ingredients);
-    return best_ingredient;
-}
-
-// Función para calcular la cantidad de pizzas por categoría vendidas
-char* pizzas_per_category(int *size, struct order *orders) {
-    char *result = malloc(200);
-    if (!result) return NULL;
-    strcpy(result, orders[0].pizza_category);
     return result;
 }
