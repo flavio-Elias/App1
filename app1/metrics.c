@@ -1,71 +1,99 @@
-/* metrics.c */
-#include "metrics.h"
-#include <stdlib.h>
+// metrics.c
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include "metrics.h"
 
-char* most_sold_pizza(int* size, Order* orders) {
-    // Check for valid input
-    if (*size <= 0 || orders == NULL) {
-        return strdup("No hay datos de pizzas");
-    }
+typedef struct {
+    char *pizza_name;
+    int total_quantity;
+} PizzaSales;
 
-    // Create arrays to track unique pizzas and their counts
-    char pizza_names[1000][50];
-    int pizza_counts[1000] = {0};
-    int unique_pizzas = 0;
+char* pms(int *size, Order *orders) {
+    int count = *size;
+    PizzaSales *sales = NULL;
+    int sales_count = 0;
 
-    // Count pizza occurrences by name_id, accounting for quantity
-    for (int i = 0; i < *size; i++) {
-        // Debug
-        printf("Procesando: %s (cantidad: %d)\n", orders[i].pizza_name_id, orders[i].quantity);
-
-        // Look for this pizza in our existing list
-        int found = -1;
-        for (int j = 0; j < unique_pizzas; j++) {
-            if (strcmp(orders[i].pizza_name_id, pizza_names[j]) == 0) {
-                found = j;
+    for (int i = 0; i < count; i++) {
+        int found = 0;
+        for (int j = 0; j < sales_count; j++) {
+            if (strcmp(sales[j].pizza_name, orders[i].pizza_name) == 0) {
+                sales[j].total_quantity += orders[i].quantity;
+                found = 1;
                 break;
             }
         }
+        if (!found) {
+            sales = realloc(sales, (sales_count + 1) * sizeof(PizzaSales));
+            sales[sales_count].pizza_name = strdup(orders[i].pizza_name);
+            sales[sales_count].total_quantity = orders[i].quantity;
+            sales_count++;
+        }
+    }
 
-        // Add to existing entry or create new one
-        if (found >= 0) {
-            pizza_counts[found] += orders[i].quantity;
+    char *top_pizza = NULL;
+    int max_qty = -1;
+
+    for (int i = 0; i < sales_count; i++) {
+        if (sales[i].total_quantity > max_qty) {
+            max_qty = sales[i].total_quantity;
+            top_pizza = sales[i].pizza_name;
         } else {
-            strncpy(pizza_names[unique_pizzas], orders[i].pizza_name_id, 49);
-            pizza_names[unique_pizzas][49] = '\0';
-            pizza_counts[unique_pizzas] = orders[i].quantity;
-            unique_pizzas++;
+            free(sales[i].pizza_name);
         }
     }
 
-    // Debug output
-    printf("Conteo final de pizzas:\n");
-    for (int i = 0; i < unique_pizzas; i++) {
-        printf("  %s: %d unidades\n", pizza_names[i], pizza_counts[i]);
-    }
-
-    // Find the pizza with highest count
-    if (unique_pizzas == 0) {
-        return strdup("No hay datos de pizzas");
-    }
-
-    int max_index = 0;
-    for (int i = 1; i < unique_pizzas; i++) {
-        if (pizza_counts[i] > pizza_counts[max_index]) {
-            max_index = i;
-        }
-    }
-
-    // Prepare result
-    char* result = malloc(100);
-    if (!result) {
-        return strdup("Error de memoria");
-    }
-
-    sprintf(result, "Pizza más vendida: %s con %d unidades",
-            pizza_names[max_index], pizza_counts[max_index]);
-
+    free(sales);
+    char *result = malloc(strlen(top_pizza) + 1);
+    strcpy(result, top_pizza);
     return result;
 }
+
+char* pls(int *size, Order *orders) {
+    int count = *size;
+    PizzaSales *sales = NULL;
+    int sales_count = 0;
+
+    for (int i = 0; i < count; i++) {
+        int found = 0;
+        for (int j = 0; j < sales_count; j++) {
+            if (strcmp(sales[j].pizza_name, orders[i].pizza_name) == 0) {
+                sales[j].total_quantity += orders[i].quantity;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            sales = realloc(sales, (sales_count + 1) * sizeof(PizzaSales));
+            sales[sales_count].pizza_name = strdup(orders[i].pizza_name);
+            sales[sales_count].total_quantity = orders[i].quantity;
+            sales_count++;
+        }
+    }
+
+    char *least_pizza = NULL;
+    int min_qty = INT_MAX;
+
+    for (int i = 0; i < sales_count; i++) {
+        if (sales[i].total_quantity < min_qty) {
+            min_qty = sales[i].total_quantity;
+            least_pizza = sales[i].pizza_name;
+        } else {
+            free(sales[i].pizza_name);
+        }
+    }
+
+    free(sales);
+    char *result = malloc(strlen(least_pizza) + 1);
+    strcpy(result, least_pizza);
+    return result;
+}
+
+// Tabla de métricas
+MetricEntry metric_table[] = {
+    {"pms", pms},
+    {"pls", pls},
+    // {"dms", dms}, ...
+    {NULL, NULL} // Terminador
+};

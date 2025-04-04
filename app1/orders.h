@@ -1,24 +1,23 @@
-//
-// Created by flavi on 01-04-2025.
-//
-
+// orders.h
 #ifndef ORDERS_H
-
 #define ORDERS_H
 
 typedef struct {
-    int pizza_id;
-    int order_id;
-    char pizza_name_id[50];
+    char *pizza_id;
+    char *order_id;
+    char *pizza_name_id;
     int quantity;
-    char order_date[11];  // Formato dd/mm/yyyy
-    char order_time[9];   // Formato hh:mm:ss
+    char *order_date;
+    char *order_time;
     float unit_price;
     float total_price;
-    char pizza_size;
-    char pizza_category[30];
-    char pizza_ingredients[200];
-    char pizza_name[50];
+    char *pizza_size;
+    char *pizza_category;
+    char *pizza_ingredients;
+    char *pizza_name;
 } Order;
 
-#endif
+// Libera memoria de un arreglo de órdenes
+void free_orders(Order *orders, int num_orders);
+
+#endif // ORDERS_H
