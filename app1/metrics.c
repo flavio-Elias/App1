@@ -203,50 +203,73 @@ char* hp(int *size, Order *orders) {
 
 
 char* apd(int *size, Order *orders) {
-    typedef struct {
-        char date[64];
-        int count;
-    } DateCount;
-
-    DateCount counts[500];
-    int count_size = 0;
+    char dates[1000][64]; // lista de fechas únicas
+    int unique_days = 0;
 
     for (int i = 0; i < *size; i++) {
         char *date = orders[i].order_date;
 
-        // Ver si ya existe la fecha
+        // Ver si ya está en la lista
         int found = 0;
-        for (int j = 0; j < count_size; j++) {
-            if (strcmp(counts[j].date, date) == 0) {
-                counts[j].count++;
+        for (int j = 0; j < unique_days; j++) {
+            if (strcmp(dates[j], date) == 0) {
                 found = 1;
                 break;
             }
         }
 
-        // Si no se encontró, la agregamos
-        if (!found && count_size < 500) {
-            strncpy(counts[count_size].date, date, 63);
-            counts[count_size].date[63] = '\0';
-            counts[count_size].count = 1;
-            count_size++;
+        // Si no está, agregarla
+        if (!found && unique_days < 1000) {
+            strncpy(dates[unique_days], date, 63);
+            dates[unique_days][63] = '\0';
+            unique_days++;
         }
     }
 
-    // Construir el string de salida
-    char *result = malloc(2048); // Ajusta tamaño si es necesario
-    result[0] = '\0';
+    int total_pizzas = *size;
+    float average = (float)total_pizzas / unique_days;
 
-    for (int i = 0; i < count_size; i++) {
-        char buffer[128];
-        snprintf(buffer, sizeof(buffer), "%s: %d", counts[i].date, counts[i].count);
-        strcat(result, buffer);
-        if (i < count_size - 1) strcat(result, " | ");
-    }
-
+    // Crear string de salida
+    char *result = malloc(64);
+    snprintf(result, 64, "%.2f", average);
     return result;
 }
 
+
+char* apo(int *size, Order *orders) {
+    char order_ids[1000][64]; // lista de IDs únicos
+    int unique_count = 0;
+
+    for (int i = 0; i < *size; i++) {
+        char *oid = orders[i].order_id;
+
+        // Ver si ya lo tenemos
+        int found = 0;
+        for (int j = 0; j < unique_count; j++) {
+            if (strcmp(order_ids[j], oid) == 0) {
+                found = 1;
+                break;
+            }
+        }
+
+        // Si no lo tenemos, agregarlo
+        if (!found && unique_count < 1000) {
+            strncpy(order_ids[unique_count], oid, 63);
+            order_ids[unique_count][63] = '\0';
+            unique_count++;
+        }
+    }
+
+    int total_pizzas = *size;
+    int total_orders = unique_count;
+
+    float average = (float)total_pizzas / total_orders;
+
+    // Crear string de salida
+    char *result = malloc(64);
+    snprintf(result, 64, "%.2f", average);
+    return result;
+}
 
 MetricEntry metric_table[] = {
     {"pms", pms},
@@ -255,5 +278,6 @@ MetricEntry metric_table[] = {
     {"dls", dls},
     {"hp", hp},
     {"apd", apd},
+    {"apo", apo},
     {NULL, NULL}
 };
