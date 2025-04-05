@@ -7,6 +7,7 @@
 #include "metrics.h"
 
 int main(int argc, char *argv[]) {
+    //74-+4 ?
     if (argc < 3) {
         fprintf(stderr, "Uso: %s <archivo.csv> <metricas...>\n", argv[0]);
         return EXIT_FAILURE;
