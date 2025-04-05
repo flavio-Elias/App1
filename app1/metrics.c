@@ -202,11 +202,58 @@ char* hp(int *size, Order *orders) {
 }
 
 
+char* apd(int *size, Order *orders) {
+    typedef struct {
+        char date[64];
+        int count;
+    } DateCount;
+
+    DateCount counts[500];
+    int count_size = 0;
+
+    for (int i = 0; i < *size; i++) {
+        char *date = orders[i].order_date;
+
+        // Ver si ya existe la fecha
+        int found = 0;
+        for (int j = 0; j < count_size; j++) {
+            if (strcmp(counts[j].date, date) == 0) {
+                counts[j].count++;
+                found = 1;
+                break;
+            }
+        }
+
+        // Si no se encontró, la agregamos
+        if (!found && count_size < 500) {
+            strncpy(counts[count_size].date, date, 63);
+            counts[count_size].date[63] = '\0';
+            counts[count_size].count = 1;
+            count_size++;
+        }
+    }
+
+    // Construir el string de salida
+    char *result = malloc(2048); // Ajusta tamaño si es necesario
+    result[0] = '\0';
+
+    for (int i = 0; i < count_size; i++) {
+        char buffer[128];
+        snprintf(buffer, sizeof(buffer), "%s: %d", counts[i].date, counts[i].count);
+        strcat(result, buffer);
+        if (i < count_size - 1) strcat(result, " | ");
+    }
+
+    return result;
+}
+
+
 MetricEntry metric_table[] = {
     {"pms", pms},
     {"pls", pls},
     {"dms", dms},
     {"dls", dls},
     {"hp", hp},
+    {"apd", apd},
     {NULL, NULL}
 };
