@@ -32,6 +32,10 @@ int main(int argc, char *argv[]) {
                     printf("Fecha con más ventas: %s\n", result);
                 } else if (strcmp(metric_name, "dls") == 0) {
                     printf("Fecha con menos ventas: %s\n", result);
+                } else if (strcmp(metric_name, "dmsp") == 0) {
+                    printf("Fecha con mas ventas en cantidad pizza: %s\n", result);
+                } else if (strcmp(metric_name, "dlsp") == 0) {
+                    printf("Fecha con menos ventas en cantidad pizza: %s\n", result);
                 } else {
                     printf("%s: %s\n", metric_name, result); // fallback
                 }
