@@ -36,6 +36,12 @@ int main(int argc, char *argv[]) {
                     printf("Fecha con mas ventas en cantidad pizza: %s\n", result);
                 } else if (strcmp(metric_name, "dlsp") == 0) {
                     printf("Fecha con menos ventas en cantidad pizza: %s\n", result);
+                } else if (strcmp(metric_name, "apo") == 0) {
+                    printf("Promedio de pizzas vendidas por orden:\n %s\n", result);
+                } else if (strcmp(metric_name, "apd") == 0) {
+                    printf("Promedio de pizzas vendidas por fecha:\n %s\n", result);
+                } else if (strcmp(metric_name, "hp") == 0) {
+                    printf("Cantidad de pizzas vendidas según categoria: %s\n", result);
                 } else {
                     printf("%s: %s\n", metric_name, result); // fallback
                 }
