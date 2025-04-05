@@ -156,11 +156,57 @@ char* dls(int *size, Order *orders) {
     return result;
 }
 
+char* hp(int *size, Order *orders) {
+    typedef struct {
+        char category[64];
+        int count;
+    } CategoryCount;
+
+    CategoryCount counts[100];
+    int count_size = 0;
+
+    for (int i = 0; i < *size; i++) {
+        char *category = orders[i].pizza_category;
+
+        // Ver si ya existe
+        int found = 0;
+        for (int j = 0; j < count_size; j++) {
+            if (strcmp(counts[j].category, category) == 0) {
+                counts[j].count++;
+                found = 1;
+                break;
+            }
+        }
+
+        // Si no se encontró, agregar nueva categoría
+        if (!found && count_size < 100) {
+            strncpy(counts[count_size].category, category, 63);
+            counts[count_size].category[63] = '\0'; // Asegurar terminación
+            counts[count_size].count = 1;
+            count_size++;
+        }
+    }
+
+    // Construir resultado como string
+    char *result = malloc(1024); // tamaño fijo, ajusta si necesitas más
+    result[0] = '\0';
+
+    for (int i = 0; i < count_size; i++) {
+        char buffer[128];
+        snprintf(buffer, sizeof(buffer), "%s: %d", counts[i].category, counts[i].count);
+        strcat(result, buffer);
+        if (i < count_size - 1) strcat(result, " | ");
+    }
+
+    return result;
+}
+
 
 MetricEntry metric_table[] = {
     {"pms", pms},
     {"pls", pls},
     {"dms", dms},
     {"dls", dls},
+    {"hp", hp},
     {NULL, NULL}
 };
