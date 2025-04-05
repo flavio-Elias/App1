@@ -368,6 +368,63 @@ char* apo(int *size, Order *orders) {
 }
 
 /// 
+
+typedef struct {
+    char *name;
+    int total_quantity;
+}IngredientSales;
+
+char* ims(int *size, Order *orders) {
+    IngredientSales *ingredients = NULL;
+    int ing_count = 0;
+
+    for (int i = 0; i < *size; i++) {
+        char *ingredient_list = strdup(orders[i].pizza_ingredients); // para no modificar el original
+        char *token = strtok(ingredient_list, ",");
+
+        while (token != NULL) {
+            // Eliminar espacios al inicio
+            while (*token == ' ') token++;
+
+            // Buscar si el ingrediente ya existe
+            int found = 0;
+            for (int j = 0; j < ing_count; j++) {
+                if (strcmp(ingredients[j].name, token) == 0) {
+                    ingredients[j].total_quantity += orders[i].quantity;
+                    found = 1;
+                    break;
+                }
+            }
+
+            if (!found) {
+                ingredients = realloc(ingredients, (ing_count + 1) * sizeof(IngredientSales));
+                ingredients[ing_count].name = strdup(token);
+                ingredients[ing_count].total_quantity = orders[i].quantity;
+                ing_count++;
+            }
+
+            token = strtok(NULL, ",");
+        }
+
+        free(ingredient_list);
+    }
+
+    // Buscar el ingrediente más vendido
+    int max = -1;
+    char *top_ingredient = NULL;
+
+    for (int i = 0; i < ing_count; i++) {
+        if (ingredients[i].total_quantity > max) {
+            max = ingredients[i].total_quantity;
+            if (top_ingredient) free(top_ingredient);
+            top_ingredient = strdup(ingredients[i].name);
+        }
+        free(ingredients[i].name);
+    }
+
+    free(ingredients);
+    return top_ingredient;
+}
 MetricEntry metric_table[] = {
     {"pms", pms},
     {"pls", pls},
@@ -378,5 +435,6 @@ MetricEntry metric_table[] = {
     {"hp", hp},
     {"apd", apd},
     {"apo", apo},
+    {"ims", ims},
     {NULL, NULL}
 };
